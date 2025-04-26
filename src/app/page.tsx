@@ -1,5 +1,4 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import type { MapData, Marker } from '../types/map';
 import { createClient } from '@supabase/supabase-js'
