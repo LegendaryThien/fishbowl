@@ -2,6 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import type { MapData, Marker } from '../types/map';
+import { createClient } from '@supabase/supabase-js'
+import { title } from 'process';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
 
 declare global {
   interface Window {
@@ -14,20 +22,30 @@ export default function HomePage() {
   const [mapData, setMapData] = useState<MapData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [markerTitle, setMarkerTitle] = useState('');
+  const [address  , setAddress] = useState('');
+  const [suffix  , setSuffix] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await fetch('/api/map', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: markerTitle
-      })
-    });
-    // Optionally, refresh the map data here
-  };
+    let response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(`${address} ${suffix}`)}&format=json&polygon=1&addressdetails=1`);
+  if (!response.ok) {
+    throw new Error("api request failed");
+  }
+  let json = await response.json();
+  // console.log(json);
+  let lat = json[0].lat;
+  let lon = json[0].lon;
+  console.log(address, lat, lon);
+  const {data, error} = await supabase.
+  from("markers")
+  .insert({
+    latitude: lat,
+    longitude: lon,
+    title: address,
+  });
+  if (error !== null) throw Error("supabase failed");
   
+  };
+
   useEffect(() => {
     async function fetchMapData() {
       try {
@@ -81,12 +99,20 @@ export default function HomePage() {
       <form onSubmit={handleSubmit} className="mb-4 flex gap-2">
       <input
         type="text"
-        placeholder="Title"
-        value={markerTitle}
-        onChange={e => setMarkerTitle(e.target.value)}
+        placeholder="Address"
+        value={address}
+        onChange={e => setAddress(e.target.value)}
+        required
+      />
+      <input
+        type="text"
+        placeholder="Suffix"
+        value={suffix}
+        onChange={e => setSuffix(e.target.value)}
         required
       />
       <button type="submit">Add Marker</button>
+      <h1><br/>example: 17927 113th Ave NE, Bothell, WA</h1>  
     </form>
     </main>
   );
