@@ -28,8 +28,8 @@ export async function GET() {
     .select();
 
   const mapData = {
-    position: { lat: 48.8584, lng: 2.2945 }, // Default center position
-    zoom: 4,
+    position: { lat: 47.603889, lng: -122.33 }, // Seattle center position
+    zoom: 12,
     mapId: 'DEMO_MAP_ID',
     markers: data?.map(marker => ({
       position: { lat: marker.latitude, lng: marker.longitude },
