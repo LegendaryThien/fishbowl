@@ -26,6 +26,9 @@ export default function HomePage() {
   const [suffix  , setSuffix] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log(address)
+    console.log(suffix)
     let response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(`${address} ${suffix}`)}&format=json&polygon=1&addressdetails=1`);
   if (!response.ok) {
     throw new Error("api request failed");
@@ -112,7 +115,8 @@ export default function HomePage() {
         required
       />
       <button type="submit">Add Marker</button>
-      <h1><br/>example: 17927 113th Ave NE, Bothell, WA</h1>  
+      <h1><br/>address example: 8421 Greenwood Ave</h1>  
+      <h1><br/>suffix example: Seattle, WA</h1>  
     </form>
     </main>
   );
