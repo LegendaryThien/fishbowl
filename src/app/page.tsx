@@ -14,7 +14,20 @@ export default function HomePage() {
   const [mapData, setMapData] = useState<MapData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [markerTitle, setMarkerTitle] = useState('');
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await fetch('/api/map', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: markerTitle
+      })
+    });
+    // Optionally, refresh the map data here
+  };
+  
   useEffect(() => {
     async function fetchMapData() {
       try {
@@ -29,6 +42,7 @@ export default function HomePage() {
     }
 
     fetchMapData();
+
   }, []);
 
   useEffect(() => {
@@ -64,6 +78,16 @@ export default function HomePage() {
   return (
     <main>
       <div id="map" className="w-full h-[500px] rounded-lg"></div>
+      <form onSubmit={handleSubmit} className="mb-4 flex gap-2">
+      <input
+        type="text"
+        placeholder="Title"
+        value={markerTitle}
+        onChange={e => setMarkerTitle(e.target.value)}
+        required
+      />
+      <button type="submit">Add Marker</button>
+    </form>
     </main>
   );
 }

@@ -39,3 +39,14 @@ export async function GET() {
 
   return NextResponse.json(mapData);
 } 
+
+export async function POST() {
+  const { title } = await request.json();
+  const { error } = await supabase
+    .from('markers')
+    .insert({
+      latitude: 0,        
+      longitude: 0,        
+      title
+    });
+}
