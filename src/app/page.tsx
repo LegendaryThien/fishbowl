@@ -24,6 +24,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [address  , setAddress] = useState('');
   const [suffix  , setSuffix] = useState('');
+  const [successMessage , setSuccessMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,7 +47,10 @@ export default function HomePage() {
     title: address,
   });
   if (error !== null) throw Error("supabase failed");
-  
+  else {
+    setSuccessMessage('Insert Successful');
+    window.location.reload();
+  } 
   };
 
   useEffect(() => {
@@ -115,9 +119,10 @@ export default function HomePage() {
         required
       />
       <button type="submit">Add Marker</button>
-      <h1><br/>address example: 8421 Greenwood Ave</h1>  
-      <h1><br/>suffix example: Seattle, WA</h1>  
     </form>
+    <h1>{successMessage}</h1>
+    <h1>address example: 8421 Greenwood Ave</h1>  
+    <h1>suffix example: Seattle, WA</h1>  
     </main>
   );
 }
