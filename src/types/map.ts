@@ -4,6 +4,7 @@ export interface Position {
 }
 
 export interface Marker {
+  id: number;
   position: Position;
   title: string;
 }

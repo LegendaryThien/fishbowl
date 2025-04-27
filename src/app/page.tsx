@@ -25,7 +25,7 @@ export default function HomePage() {
   const [address  , setAddress] = useState('');
   const [suffix  , setSuffix] = useState('');
   const [successMessage , setSuccessMessage] = useState('');
-  const [selectedMarker, setSelectedMarker] = useState<{ title: string } | null>(null);
+  const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -102,7 +102,7 @@ export default function HomePage() {
         
         marker.addListener('click', () => {
           infoWindow.open(map, marker)
-          setSelectedMarker({ title: markerData.title });
+          setSelectedMarker(markerData);
         });
 
       });
@@ -115,7 +115,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (selectedMarker) {
-      console.log("selectedMarker updated:", selectedMarker.title);
+      console.log("selectedMarker updated:", selectedMarker.id);
     }
   }, [selectedMarker]);
 
@@ -127,10 +127,15 @@ export default function HomePage() {
     e.preventDefault();
     if (!selectedMarker) return;
     const response = await supabase
-      .from('countries')
+      .from('markers')
       .delete()
-      .eq('title', selectedMarker.title);
+      .eq('id', selectedMarker.id);
 
+    if (error !== null) throw Error("supabase failed");
+    else {
+      setSuccessMessage('Delete Successful');
+      window.location.reload();
+    } 
   };
         
 
