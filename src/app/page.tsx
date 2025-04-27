@@ -102,7 +102,8 @@ export default function HomePage() {
         const marker = new AdvancedMarkerElement({
           map: map,
           position: markerData.position,
-          title: markerData.title,
+          content: beachFlagImg,
+          title: markerData.title
         })
 
         const infoWindow = new google.maps.InfoWindow({
