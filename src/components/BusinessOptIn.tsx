@@ -92,7 +92,7 @@ export default function AddFishForm() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label htmlFor="address" className="text-xl font-medium text-[#1a3c6e]">
-              Address:
+              Street Address:
             </label>
             <Input
               id="address"
@@ -107,7 +107,7 @@ export default function AddFishForm() {
 
           <div className="space-y-2">
             <label htmlFor="suffix" className="text-xl font-medium text-[#1a3c6e]">
-              Suffix:
+              City:
             </label>
             <Input
               id="suffix"
