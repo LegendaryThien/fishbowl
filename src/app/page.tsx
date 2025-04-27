@@ -95,6 +95,10 @@ export default function HomePage() {
       })
 
       mapData!.markers.forEach((markerData: Marker) => {
+
+        const beachFlagImg = document.createElement('img');
+        beachFlagImg.src = 'https://i.imgur.com/9M2BfXq.png';
+
         const marker = new AdvancedMarkerElement({
           map: map,
           position: markerData.position,
