@@ -89,11 +89,21 @@ export default function HomePage() {
       );
 
       mapData!.markers.forEach((markerData: Marker) => {
-        new AdvancedMarkerElement({
+        const marker = new AdvancedMarkerElement({
           map: map,
           position: markerData.position,
           title: markerData.title
         });
+
+
+        const infoWindow = new google.maps.InfoWindow({
+          content: "<div><strong>Hello World!</strong><br>This is my InfoWindow content for </div>" + markerData.title,
+        });
+        
+        marker.addListener('click', () => {
+          infoWindow.open(map, marker)
+        });
+
       });
     }
 
