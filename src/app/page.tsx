@@ -100,7 +100,7 @@ export default function HomePage() {
 
   return (
     <main>
-      <div id="map" className="w-full h-[500px] rounded-lg"></div>
+   <div id="map" className="w-screen h-screen rounded-lg"></div>
       <form onSubmit={handleSubmit} className="mb-4 flex gap-2">
       <input
         type="text"
