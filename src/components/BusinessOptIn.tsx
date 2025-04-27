@@ -1,6 +1,73 @@
-import { Button } from "~/components/ui/button"
+"use client"
 
-export default function BusinessScreen() {
+import type React from "react"
+
+import { useState } from "react"
+import { Button } from "~/components/ui/button"
+import { Input } from "~/components/ui/input"
+import { createClient } from "@supabase/supabase-js"
+
+// Initialize Supabase client
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+
+export default function AddFishForm() {
+  const [address, setAddress] = useState("")
+  const [suffix, setSuffix] = useState("")
+  const [successMessage, setSuccessMessage] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    setSuccessMessage("")
+
+    try {
+      // Get coordinates from OpenStreetMap Nominatim API
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(`${address} ${suffix}`)}&format=json&polygon=1&addressdetails=1`,
+      )
+
+      if (!response.ok) {
+        throw new Error("Address lookup failed")
+      }
+
+      const json = await response.json()
+
+      if (!json.length) {
+        throw new Error("Address not found")
+      }
+
+      const lat = json[0].lat
+      const lon = json[0].lon
+
+      // Insert marker into Supabase
+      const { data, error: supabaseError } = await supabase.from("markers").insert({
+        latitude: lat,
+        longitude: lon,
+        title: address,
+      })
+
+      if (supabaseError) {
+        throw new Error("Failed to save location")
+      }
+
+      setSuccessMessage("Fish added successfully!")
+      setAddress("")
+      setSuffix("")
+
+      // Optional: reload the page after a delay
+      setTimeout(() => {
+        window.location.reload()
+      }, 2000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unknown error occurred")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#d9edf9] flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Wavy top border */}
@@ -16,14 +83,60 @@ export default function BusinessScreen() {
 
       <div className="w-full max-w-md z-10 mt-16">
         {/* Main heading */}
-        <h1 className="text-3xl md:text-4xl font-bold text-center text-[#1a3c6e] mb-8">Add your business to fish.bowl!</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-center text-[#1a3c6e] mb-12">Add your Fish</h1>
 
-        {/* Welcome text */}
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-medium mb-1">Address:</h2>
-          <p className="text-gray-700">Suffix:</p>
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <label htmlFor="address" className="text-xl font-medium text-[#1a3c6e]">
+              Address:
+            </label>
+            <Input
+              id="address"
+              type="text"
+              placeholder="e.g. 8421 Greenwood Ave"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className="bg-white rounded-md py-6 px-4 text-lg"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="suffix" className="text-xl font-medium text-[#1a3c6e]">
+              Suffix:
+            </label>
+            <Input
+              id="suffix"
+              type="text"
+              placeholder="e.g. Seattle, WA"
+              value={suffix}
+              onChange={(e) => setSuffix(e.target.value)}
+              className="bg-white rounded-md py-6 px-4 text-lg"
+              required
+            />
+          </div>
+
+          {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{error}</div>}
+
+          {successMessage && (
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+              {successMessage}
+            </div>
+          )}
+
+          <div className="flex justify-end pt-4">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="bg-[#1a3c6e] hover:bg-[#0f2a50] text-white rounded-full px-8 py-6 text-lg"
+            >
+              {loading ? "Adding..." : "Add Fish"}
+            </Button>
+          </div>
+        </form>
       </div>
+
+      
     </div>
   )
 }
