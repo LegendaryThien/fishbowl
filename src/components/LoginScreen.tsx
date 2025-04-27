@@ -1,17 +1,15 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "~/components/ui/button"
 import { useRouter } from 'next/navigation';
-
 
 export default function LoginScreen() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-[#d9edf9] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[#d9edf9] flex flex-col items-center justify-between p-4 relative overflow-hidden">
       {/* Wavy top border */}
       <div className="absolute top-0 left-0 w-full">
         <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-24">
@@ -81,16 +79,26 @@ export default function LoginScreen() {
           </Button>
         </div>
 
-        {/* Continue button */}
-        <div className="flex justify-end">
-        <Button
-  className="bg-[#fffef0] hover:bg-[#f5f4e8] text-[#1a3c6e] font-medium rounded-full px-6 py-6"
-  onClick={() => router.push('/')} // Move onClick here
->
-  Continue to <span className="font-bold ml-1">fish.bowl</span>
-</Button>
+        <div className="flex justify-between items-center w-full max-w-md mt-8">
+  
 
-        </div>
+  {/* New "Add your fish!" button */}
+  <Button
+    className="bg-[#fffef0] hover:bg-[#f5f4e8] text-[#1a3c6e] font-medium rounded-full px-6 py-6"
+    onClick={() => router.push('/BusinessScreen')} // Adjust the route
+  >
+    Add your fish!
+  </Button>
+
+  {/* Continue button */}
+  <Button
+    className="bg-[#fffef0] hover:bg-[#f5f4e8] text-[#1a3c6e] font-medium rounded-full px-6 py-6"
+    onClick={() => router.push('/')}
+  >
+    Continue to <span className="font-bold ml-1">fish.bowl</span>
+  </Button>
+</div>
+
       </div>
     </div>
   )

@@ -1,6 +1,10 @@
+"use client"
 import Image from "next/image"
+import { Button } from "~/components/ui/button"
+import { useRouter } from 'next/navigation';
 
 export default function FishBowlLanding() {
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-[#d9edf9] flex items-center justify-center p-4">
       <div className="container max-w-6xl mx-auto">
@@ -28,7 +32,7 @@ export default function FishBowlLanding() {
               {/* Fountain image */}
               <div className="w-full h-64 relative">
                 <Image
-                  src="/placeholder.svg?height=400&width=600"
+                  src="/fountain image.jpg"
                   alt="Water fountain in a park"
                   fill
                   className="object-cover"
@@ -37,7 +41,12 @@ export default function FishBowlLanding() {
 
               {/* Card footer */}
               <div className="p-6 bg-[#d9edf9] text-center">
-                <p className="text-[#4a6275] text-lg font-medium">Check Out Our Features</p>
+              <Button
+    className="bg-[#fffef0] hover:bg-[#f5f4e8] text-[#1a3c6e] font-medium rounded-full px-6 py-6"
+    onClick={() => router.push('/')}
+  >
+    Check Out Our Features
+  </Button>
               </div>
             </div>
           </div>
