@@ -25,6 +25,7 @@ export default function HomePage() {
   const [address  , setAddress] = useState('');
   const [suffix  , setSuffix] = useState('');
   const [successMessage , setSuccessMessage] = useState('');
+  const [selectedMarker, setSelectedMarker] = useState<{ title: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -95,13 +96,13 @@ export default function HomePage() {
           title: markerData.title
         });
 
-
         const infoWindow = new google.maps.InfoWindow({
-          content: "<div><strong>Hello World!</strong><br>This is my InfoWindow content for </div>" + markerData.title,
+          content: "<div>Address: </div>" + markerData.title
         });
         
         marker.addListener('click', () => {
           infoWindow.open(map, marker)
+          setSelectedMarker({ title: markerData.title });
         });
 
       });
@@ -109,6 +110,29 @@ export default function HomePage() {
 
     initMap();
   }, [mapData]);
+
+
+
+  useEffect(() => {
+    if (selectedMarker) {
+      console.log("selectedMarker updated:", selectedMarker.title);
+    }
+  }, [selectedMarker]);
+
+
+
+
+
+  const deleteMarker = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedMarker) return;
+    const response = await supabase
+      .from('countries')
+      .delete()
+      .eq('title', selectedMarker.title);
+
+  };
+        
 
   return (
     <main>
@@ -129,10 +153,16 @@ export default function HomePage() {
         required
       />
       <button type="submit">Add Marker</button>
-    </form>
+
     <h1>{successMessage}</h1>
     <h1>address example: 8421 Greenwood Ave</h1>  
     <h1>suffix example: Seattle, WA</h1>  
+
+    </form>
+    <form onSubmit={deleteMarker} className="mb-4 flex gap-2">
+    <button type="submit">Delete</button>
+    </form>
+
     </main>
   );
 }
