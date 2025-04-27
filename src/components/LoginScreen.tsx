@@ -1,6 +1,15 @@
+"use client"
+
+import type React from "react"
+
+import { useState } from "react"
 import { Button } from "~/components/ui/button"
+import { useRouter } from 'next/navigation';
+
 
 export default function LoginScreen() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-[#d9edf9] flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Wavy top border */}
@@ -74,9 +83,13 @@ export default function LoginScreen() {
 
         {/* Continue button */}
         <div className="flex justify-end">
-          <Button className="bg-[#fffef0] hover:bg-[#f5f4e8] text-[#1a3c6e] font-medium rounded-full px-6 py-6">
-            Continue to <span className="font-bold ml-1">fish.bowl</span>
-          </Button>
+        <Button
+  className="bg-[#fffef0] hover:bg-[#f5f4e8] text-[#1a3c6e] font-medium rounded-full px-6 py-6"
+  onClick={() => router.push('/')} // Move onClick here
+>
+  Continue to <span className="font-bold ml-1">fish.bowl</span>
+</Button>
+
         </div>
       </div>
     </div>

@@ -1,171 +1,186 @@
-'use client';
-import { useEffect, useState } from 'react';
-import type { MapData, Marker } from '../types/map';
-import { createClient } from '@supabase/supabase-js'
-import { title } from 'process';
+"use client"
+import { useEffect, useState } from "react"
+import type React from "react"
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import type { MapData, Marker } from "../types/map"
+import { createClient } from "@supabase/supabase-js"
+import { Button } from "~/components/ui/button"
+import { Trash2, Plus } from "lucide-react"
+import Link from "next/link"
 
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
 declare global {
   interface Window {
-    google: typeof google;
+    google: typeof google
   }
 }
 
 export default function HomePage() {
-  
-  const [mapData, setMapData] = useState<MapData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [address  , setAddress] = useState('');
-  const [suffix  , setSuffix] = useState('');
-  const [successMessage , setSuccessMessage] = useState('');
-  const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
+  const [mapData, setMapData] = useState<MapData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [address, setAddress] = useState("")
+  const [suffix, setSuffix] = useState("")
+  const [successMessage, setSuccessMessage] = useState("")
+  const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log(address)
-    console.log(suffix)
-    let response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(`${address} ${suffix}`)}&format=json&polygon=1&addressdetails=1`);
-  if (!response.ok) {
-    throw new Error("api request failed");
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(`${address} ${suffix}`)}&format=json&polygon=1&addressdetails=1`,
+      )
+      if (!response.ok) {
+        throw new Error("API request failed")
+      }
+      const json = await response.json()
+      if (json.length === 0) {
+        throw new Error("Address not found")
+      }
+
+      const lat = json[0].lat
+      const lon = json[0].lon
+
+      const { data, error: supabaseError } = await supabase.from("markers").insert({
+        latitude: lat,
+        longitude: lon,
+        title: address,
+      })
+
+      if (supabaseError) throw Error("Supabase insert failed")
+      setSuccessMessage("Location added successfully!")
+      setAddress("")
+      setSuffix("")
+
+      // Reload after a short delay
+      setTimeout(() => {
+        window.location.reload()
+      }, 1500)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unknown error occurred")
+    }
   }
-  let json = await response.json();
-  // console.log(json);
-  let lat = json[0].lat;
-  let lon = json[0].lon;
-  console.log(address, lat, lon);
-  const {data, error} = await supabase.
-  from("markers")
-  .insert({
-    latitude: lat,
-    longitude: lon,
-    title: address,
-  });
-  if (error !== null) throw Error("supabase failed");
-  else {
-    setSuccessMessage('Insert Successful');
-    window.location.reload();
-  } 
-  };
+
   useEffect(() => {
     async function fetchMapData() {
       try {
-        const response = await fetch('/api/map');
-        const data = await response.json();
-        setMapData(data);
+        const response = await fetch("/api/map")
+        const data = await response.json()
+        setMapData(data)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unknown error occurred');
+        setError(err instanceof Error ? err.message : "An unknown error occurred")
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
 
-    fetchMapData();
-
-  }, []);
+    fetchMapData()
+  }, [])
 
   useEffect(() => {
-    if (!mapData) return;
+    if (!mapData) return
 
-    let map: google.maps.Map;
+    let map: google.maps.Map
 
     async function initMap() {
-      const { Map } = await google.maps.importLibrary("maps") as google.maps.MapsLibrary;
-      const { AdvancedMarkerElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
+      const { Map } = (await google.maps.importLibrary("maps")) as google.maps.MapsLibrary
+      const { AdvancedMarkerElement } = (await google.maps.importLibrary("marker")) as google.maps.MarkerLibrary
 
-      map = new Map(
-        document.getElementById('map') as HTMLElement,
-        {
-          zoom: mapData!.zoom,
-          center: mapData!.position,
-          mapId: mapData!.mapId,
-        }
-      );
+      map = new Map(document.getElementById("map") as HTMLElement, {
+        zoom: mapData!.zoom,
+        center: mapData!.position,
+        mapId: mapData!.mapId,
+      })
 
       mapData!.markers.forEach((markerData: Marker) => {
         const marker = new AdvancedMarkerElement({
           map: map,
           position: markerData.position,
-          title: markerData.title
-        });
+          title: markerData.title,
+        })
 
         const infoWindow = new google.maps.InfoWindow({
-          content: "<div>Address: </div>" + markerData.title
-        });
-        
-        marker.addListener('click', () => {
+          content: "<div>Address: </div>" + markerData.title,
+        })
+
+        marker.addListener("click", () => {
           infoWindow.open(map, marker)
-          setSelectedMarker(markerData);
-        });
-
-      });
+          setSelectedMarker(markerData)
+        })
+      })
     }
 
-    initMap();
-  }, [mapData]);
+    initMap()
+  }, [mapData])
 
+  const deleteMarker = async () => {
+    if (!selectedMarker) return
 
+    try {
+      setIsDeleting(true)
+      const { error: deleteError } = await supabase.from("markers").delete().eq("id", selectedMarker.id)
 
-  useEffect(() => {
-    if (selectedMarker) {
-      console.log("selectedMarker updated:", selectedMarker.id);
+      if (deleteError) throw Error("Delete failed")
+
+      setSuccessMessage("Location deleted successfully!")
+      setSelectedMarker(null)
+
+      // Reload after a short delay
+      setTimeout(() => {
+        window.location.reload()
+      }, 1500)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unknown error occurred")
+    } finally {
+      setIsDeleting(false)
     }
-  }, [selectedMarker]);
-
-
-
-
-
-  const deleteMarker = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedMarker) return;
-    const response = await supabase
-      .from('markers')
-      .delete()
-      .eq('id', selectedMarker.id);
-
-    if (error !== null) throw Error("supabase failed");
-    else {
-      setSuccessMessage('Delete Successful');
-      window.location.reload();
-    } 
-  };
-        
+  }
 
   return (
-    <main>
-   <div id="map" className="w-screen h-screen rounded-lg"></div>
-      <form onSubmit={handleSubmit} className="mb-4 flex gap-2">
-      <input
-        type="text"
-        placeholder="Address"
-        value={address}
-        onChange={e => setAddress(e.target.value)}
-        required
-      />
-      <input
-        type="text"
-        placeholder="Suffix"
-        value={suffix}
-        onChange={e => setSuffix(e.target.value)}
-        required
-      />
-      <button type="submit">Add Marker</button>
+    <main className="relative">
+      {/* Map container */}
+      <div id="map" className="w-screen h-screen"></div>
 
-    <h1>{successMessage}</h1>
-    <h1>address example: 8421 Greenwood Ave</h1>  
-    <h1>suffix example: Seattle, WA</h1>  
+      {/* Floating action buttons */}
+      <div className="absolute bottom-6 right-6 flex flex-col gap-3">
+        {/* Add new location button */}
+        <Link href="/add-fish">
+          <Button
+            className="w-12 h-12 rounded-full bg-[#1a3c6e] hover:bg-[#0f2a50] text-white shadow-lg"
+            aria-label="Add new location"
+          >
+            <Plus size={24} />
+          </Button>
+        </Link>
 
-    </form>
-    <form onSubmit={deleteMarker} className="mb-4 flex gap-2">
-    <button type="submit">Delete</button>
-    </form>
+        {/* Delete button - only visible when a marker is selected */}
+        {selectedMarker && (
+          <Button
+            onClick={deleteMarker}
+            disabled={isDeleting}
+            className="w-12 h-12 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg"
+            aria-label="Delete selected location"
+          >
+            <Trash2 size={24} />
+          </Button>
+        )}
+      </div>
 
+      {/* Success message toast */}
+      {successMessage && (
+        <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded shadow-lg">
+          {successMessage}
+        </div>
+      )}
+
+      {/* Error message toast */}
+      {error && (
+        <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-lg">
+          {error}
+        </div>
+      )}
     </main>
-  );
+  )
 }

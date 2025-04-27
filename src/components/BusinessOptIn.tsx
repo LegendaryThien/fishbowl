@@ -6,11 +6,15 @@ import { useState } from "react"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { createClient } from "@supabase/supabase-js"
+import { useRouter } from 'next/navigation';
+
+
 
 // Initialize Supabase client
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
 export default function AddFishForm() {
+  const router = useRouter();
   const [address, setAddress] = useState("")
   const [suffix, setSuffix] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
@@ -129,6 +133,7 @@ export default function AddFishForm() {
               type="submit"
               disabled={loading}
               className="bg-[#1a3c6e] hover:bg-[#0f2a50] text-white rounded-full px-8 py-6 text-lg"
+              onClick={() => router.push('/')}
             >
               {loading ? "Adding..." : "Add Fish"}
             </Button>
@@ -136,7 +141,16 @@ export default function AddFishForm() {
         </form>
       </div>
 
-      
+      {/* Navigation button */}
+      <div className="absolute bottom-6 left-6">
+        <Button
+          variant="outline"
+          className="rounded-full w-12 h-12 bg-gray-800 text-white border-none flex items-center justify-center"
+          onClick={() => window.history.back()}
+        >
+          
+        </Button>
+      </div>
     </div>
   )
 }
