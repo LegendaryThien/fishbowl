@@ -24,6 +24,7 @@ export default function HomePage() {
   const [address  , setAddress] = useState('');
   const [suffix  , setSuffix] = useState('');
   const [successMessage , setSuccessMessage] = useState('');
+  const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -87,16 +88,54 @@ export default function HomePage() {
       );
 
       mapData!.markers.forEach((markerData: Marker) => {
-        new AdvancedMarkerElement({
+        const marker = new AdvancedMarkerElement({
           map: map,
           position: markerData.position,
           title: markerData.title
         });
+
+        const infoWindow = new google.maps.InfoWindow({
+          content: "<div>Address: </div>" + markerData.title
+        });
+        
+        marker.addListener('click', () => {
+          infoWindow.open(map, marker)
+          setSelectedMarker(markerData);
+        });
+
       });
     }
 
     initMap();
   }, [mapData]);
+
+
+
+  useEffect(() => {
+    if (selectedMarker) {
+      console.log("selectedMarker updated:", selectedMarker.id);
+    }
+  }, [selectedMarker]);
+
+
+
+
+
+  const deleteMarker = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedMarker) return;
+    const response = await supabase
+      .from('markers')
+      .delete()
+      .eq('id', selectedMarker.id);
+
+    if (error !== null) throw Error("supabase failed");
+    else {
+      setSuccessMessage('Delete Successful');
+      window.location.reload();
+    } 
+  };
+        
 
   return (
     <main>
@@ -117,10 +156,16 @@ export default function HomePage() {
         required
       />
       <button type="submit">Add Marker</button>
-    </form>
+
     <h1>{successMessage}</h1>
     <h1>address example: 8421 Greenwood Ave</h1>  
     <h1>suffix example: Seattle, WA</h1>  
+
+    </form>
+    <form onSubmit={deleteMarker} className="mb-4 flex gap-2">
+    <button type="submit">Delete</button>
+    </form>
+
     </main>
   );
 }

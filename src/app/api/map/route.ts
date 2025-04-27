@@ -32,6 +32,7 @@ export async function GET() {
     zoom: 12,
     mapId: 'DEMO_MAP_ID',
     markers: data?.map(marker => ({
+      id: marker.id,
       position: { lat: marker.latitude, lng: marker.longitude },
       title: marker.title
     }))
