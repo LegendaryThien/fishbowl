@@ -7,8 +7,9 @@ import { createClient } from "@supabase/supabase-js"
 import { Button } from "~/components/ui/button"
 import { Trash2, Plus } from "lucide-react"
 import Link from "next/link"
+import { supabase } from "~/lib/supabase"
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+const supabaseClient = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
 declare global {
   interface Window {
@@ -25,6 +26,7 @@ export default function HomePage() {
   const [successMessage, setSuccessMessage] = useState("")
   const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [user, setUser] = useState<any>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,7 +45,7 @@ export default function HomePage() {
       const lat = json[0].lat
       const lon = json[0].lon
 
-      const { data, error: supabaseError } = await supabase.from("markers").insert({
+      const { data, error: supabaseError } = await supabaseClient.from("markers").insert({
         latitude: lat,
         longitude: lon,
         title: address,
@@ -77,6 +79,13 @@ export default function HomePage() {
     }
 
     fetchMapData()
+  }, [])
+
+  useEffect(() => {
+    // Fetch user info on mount
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data?.user ?? null)
+    })
   }, [])
 
   useEffect(() => {
@@ -125,7 +134,7 @@ export default function HomePage() {
 
     try {
       setIsDeleting(true)
-      const { error: deleteError } = await supabase.from("markers").delete().eq("id", selectedMarker.id)
+      const { error: deleteError } = await supabaseClient.from("markers").delete().eq("id", selectedMarker.id)
 
       if (deleteError) throw Error("Delete failed")
 
@@ -145,6 +154,12 @@ export default function HomePage() {
 
   return (
     <main className="relative">
+      {/* Signed in as message */}
+      {user && user.email && (
+        <div className="absolute top-6 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded text-[#1a3c6e] font-light text-base tracking-wide z-20" style={{ fontFamily: 'Inter, Roboto, Helvetica Neue, Arial, sans-serif', backgroundColor: 'rgba(229, 231, 235, 0.7)' }}>
+          Signed in as {user.email}
+        </div>
+      )}
       {/* Map container */}
       <div id="map" className="w-screen h-screen"></div>
 
@@ -157,6 +172,16 @@ export default function HomePage() {
             aria-label="Add new location"
           >
             <Plus size={24} />
+          </Button>
+        </Link>
+
+        {/* LoginScreen button */}
+        <Link href="/LoginScreen">
+          <Button
+            className="w-12 h-12 rounded-full bg-[#4B9CD3] hover:bg-[#357ABD] text-white shadow-lg font-light text-base"
+            aria-label="Go to Login Screen"
+          >
+            Login
           </Button>
         </Link>
 
