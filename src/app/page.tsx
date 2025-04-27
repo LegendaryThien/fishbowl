@@ -75,6 +75,7 @@ export default function HomePage() {
     let map: google.maps.Map;
 
     async function initMap() {
+      // https://developers.google.com/maps/documentation/javascript/overview
       const { Map } = await google.maps.importLibrary("maps") as google.maps.MapsLibrary;
       const { AdvancedMarkerElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
 
@@ -86,11 +87,17 @@ export default function HomePage() {
           mapId: mapData!.mapId,
         }
       );
+      
 
       mapData!.markers.forEach((markerData: Marker) => {
+
+        const beachFlagImg = document.createElement('img');
+        beachFlagImg.src = 'https://i.imgur.com/9M2BfXq.png';
+
         const marker = new AdvancedMarkerElement({
           map: map,
           position: markerData.position,
+          content: beachFlagImg,
           title: markerData.title
         });
 
@@ -116,7 +123,6 @@ export default function HomePage() {
       console.log("selectedMarker updated:", selectedMarker.id);
     }
   }, [selectedMarker]);
-
 
 
 

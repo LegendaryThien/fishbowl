@@ -23,6 +23,8 @@ INSERT INTO markers (latitude, longitude, title) VALUES
 */
 
 export async function GET() {
+
+  // https://supabase.com/docs/reference/javascript/v1/introduction
   const { data } = await supabase
     .from('markers')
     .select();
