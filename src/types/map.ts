@@ -7,6 +7,7 @@ export interface Marker {
   id: number;
   position: Position;
   title: string;
+  type: 'fountain' | 'toilet' | 'outlet';
 }
 
 export interface MapData {

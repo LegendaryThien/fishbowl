@@ -20,6 +20,7 @@ export default function AddFishForm() {
   const [successMessage, setSuccessMessage] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [iconType, setIconType] = useState<'fountain' | 'toilet' | 'outlet'>('fountain')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,6 +52,7 @@ export default function AddFishForm() {
         latitude: lat,
         longitude: lon,
         title: address,
+        type: iconType,
       })
 
       if (supabaseError) {
@@ -60,6 +62,7 @@ export default function AddFishForm() {
       setSuccessMessage("Fish added successfully!")
       setAddress("")
       setSuffix("")
+      setIconType('fountain')
 
       // Optional: reload the page after a delay
       setTimeout(() => {
@@ -118,6 +121,23 @@ export default function AddFishForm() {
               className="bg-white rounded-md py-6 px-4 text-lg"
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="icon-type" className="text-xl font-medium text-[#1a3c6e]">
+              Marker Icon Type:
+            </label>
+            <select
+              id="icon-type"
+              value={iconType}
+              onChange={e => setIconType(e.target.value as 'fountain' | 'toilet' | 'outlet')}
+              className="border rounded px-2 py-2 text-lg text-[#1a3c6e] bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+              required
+            >
+              <option value="fountain">Fountain</option>
+              <option value="toilet">Toilet</option>
+              <option value="outlet">Outlet</option>
+            </select>
           </div>
 
           {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{error}</div>}

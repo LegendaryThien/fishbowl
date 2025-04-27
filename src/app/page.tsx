@@ -27,6 +27,7 @@ export default function HomePage() {
   const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const [selectedImgType, setSelectedImgType] = useState<'fountain' | 'toilet' | 'outlet'>('fountain')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,6 +50,7 @@ export default function HomePage() {
         latitude: lat,
         longitude: lon,
         title: address,
+        type: selectedImgType, // store the selected icon type
       })
 
       if (supabaseError) throw Error("Supabase insert failed")
@@ -104,14 +106,28 @@ export default function HomePage() {
       })
 
       mapData!.markers.forEach((markerData: Marker) => {
+        const fountainImg = document.createElement('img');
+        fountainImg.src = 'https://i.imgur.com/9M2BfXq.png';
 
-        const beachFlagImg = document.createElement('img');
-        beachFlagImg.src = 'https://i.imgur.com/9M2BfXq.png';
+
+        const toiletImg = document.createElement('img');
+        toiletImg.src = 'https://i.imgur.com/NUjPxlM.png';
+
+
+        const outletImg = document.createElement('img');
+        outletImg.src = 'https://i.imgur.com/MbTwbFy.png';
+
+
+        // Pick the correct image based on the marker's type
+        let imgContent: HTMLImageElement;
+        if (markerData.type === 'fountain') imgContent = fountainImg;
+        else if (markerData.type === 'toilet') imgContent = toiletImg;
+        else imgContent = outletImg;
 
         const marker = new AdvancedMarkerElement({
           map: map,
           position: markerData.position,
-          content: beachFlagImg,
+          content: imgContent,
           title: markerData.title
         })
 
@@ -127,7 +143,7 @@ export default function HomePage() {
     }
 
     initMap()
-  }, [mapData])
+  }, [mapData, selectedImgType])
 
   const deleteMarker = async () => {
     if (!selectedMarker) return
@@ -156,7 +172,7 @@ export default function HomePage() {
     <main className="relative">
       {/* Signed in as message */}
       {user && user.email && (
-        <div className="absolute top-6 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded text-[#1a3c6e] font-light text-base tracking-wide z-20" style={{ fontFamily: 'Inter, Roboto, Helvetica Neue, Arial, sans-serif', backgroundColor: 'rgba(229, 231, 235, 0.7)' }}>
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded text-[#1a3c6e] font-light text-base tracking-wide z-20" style={{ fontFamily: 'Inter, Roboto, Helvetica Neue, Arial, sans-serif', backgroundColor: 'rgba(229, 231, 235, 0.7)' }}>
           Signed in as {user.email}
         </div>
       )}

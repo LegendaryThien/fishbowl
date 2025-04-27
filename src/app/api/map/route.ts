@@ -36,7 +36,8 @@ export async function GET() {
     markers: data?.map(marker => ({
       id: marker.id,
       position: { lat: marker.latitude, lng: marker.longitude },
-      title: marker.title
+      title: marker.title,
+      type: marker.type || 'fountain', // fallback for old data
     }))
   };
 
