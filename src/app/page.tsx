@@ -51,7 +51,6 @@ export default function HomePage() {
     window.location.reload();
   } 
   };
-
   useEffect(() => {
     async function fetchMapData() {
       try {
