@@ -151,7 +151,7 @@ export default function HomePage() {
       {/* Floating action buttons */}
       <div className="absolute bottom-6 right-6 flex flex-col gap-3">
         {/* Add new location button */}
-        <Link href="/add-fish">
+        <Link href="/BusinessScreen">
           <Button
             className="w-12 h-12 rounded-full bg-[#1a3c6e] hover:bg-[#0f2a50] text-white shadow-lg"
             aria-label="Add new location"
